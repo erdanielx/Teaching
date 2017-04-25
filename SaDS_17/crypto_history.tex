@@ -1,34 +1,142 @@
-One of the oldest known encryption algorithms is the so called Caesar cipher. It is said that he used it for communication with his army. It is a very simple character-wise substitution cipher. The idea is to substitute letters for each others. In this very simple case the alphabet has been shifted by 3 letters in a cyclic way. Thus, an a would be encrypted to an e, b would be f, c would be g, d would be h,\ldots, w becomes a, x becomes b and z becomes d. 
-\begin{example}\ 
+\subsubsection{Substitution Ciphers}
+
+One of the oldest known encryption algorithms is the so called Caesar cipher. It is said that he used it for communication with his army. It is a very simple character-wise substitution cipher. The idea is to substitute letters for each others.
+
+\begin{example}[Caesar Cipher]
+ In a very simple case the alphabet can be shifted by $3$ letters forward cyclically.
+ Thus, \texttt{a} would be encrypted as \texttt{d}, \texttt{b} as \texttt{e}, \texttt{z} as \texttt{c}, etc.
+
+ Below the lower row contains the encryption of the upper row. 
   \begin{lstlisting}
-  	meet me after the toga party
-  	phhw ph diwhu wkh wrjd sduwb
+    meet me after the toga party
+    phhw ph diwhu wkh wrjd sduwb
   \end{lstlisting}
 \end{example}
-Let us make this algorithm mathematically a bit more precise. Firstly, we represent each letter by a number $1, 2, 3,\ldots , 26$ and the key $k$ another number from 1 to 26. Now for each letter $l$, we can compute its image $\phi(l)$ under the cipher $\phi$ as $phi(l):\Equiv l+3\modop 26$.
 
-In general the alphabet can be shifted by any arbitrary number $k$ of letters from 1 to 26 (or whatever the size of the alphabet is). This is obviously, a very weak cipher. Here, an attacker can easily try out all 26 possible combinations and thus find the key and break the cipher (brute-force-attack). 
+Let us make this algorithm mathematically a bit more precise.
+We usually represent all data as a number in $\Z_n$ so that encryption and decryption are functions $\Z_n\to\Z_n$.
+$\Z_n$ is called the \textbf{alphabet}.
+For the Latin alphabet, we have $n=26$, i.e., the letters are represented as the numbers $0, 1, 2,\ldots, 25$.
 
-We can generalize this approach of substituting the letters individually by different letters in the alphabet. This is called a monoalphabetic cipher. The key now contains the images of each individual letter in our alphabet i.e. it is the ciphertext of the plaintext ``abcdefghijklmnopqrstuvwxyz''. In order to be able to unambiguously decrypt a ciphertext, we require every letter to have a different image. There are still $26!\approx 4\times 10^{26}\approx 2^{88}$ possible keys, so a brute force attack seems very hard and this looks like a very strong cipher, at first sight. 
+The length of the shift can be any number from $0$ to $25$.
+It is very typical that an encryption scheme has such an arbitrary parameter.
+Every choice of the parameter yields a different encryption function, and it is necessary to know that number to decrypt.
+This number is called the \textbf{key}.
 
-Monoalphabetic substitution ciphers can however be attacked very efficiently. This is because, they don't obfuscate certain patterns in the plain-text, since they encrypt the same plaintext with the same ciphertext every time. In particular the same letter is always encrypted with the same letter in the ciphertext. 
-Thus, the frequencies of occurrences of letters in the ciphertext can be correlated to the expected frequencies of occurrences of the plaintext. Then, the substitution can be guessed. This attack works for all monoalphabetic ciphers. 
+Now for a given key $k$, we can encrypt each letter $x$ as $\phi_k(x)=(x+k)\modop n$.
+This is obviously, a very weak cipher.
+Here, an attacker can easily try out all $26$ possible keys $k$ until the decryption of the message becomes a legible message.
+Trying every possible key like this is called a \textbf{brute-force-attack}. 
 
-So it is useful, to look at polyalphabetic ciphers i.e. cipher that encrypt entire blocks of plaintext. One very simple polyalphabetic cipher is the so called Vigin\`e{}re-cipher, a generalisation of Caesar's cipher, where blocks of subsequent letters are encrypted using Ceasar's cipher for each letter in the block using a different sub-key. 
+We can generalize this approach of substituting the letters individually by different letters in the alphabet.
+As the encryption function, we use an arbitrary bijection $\phi:\Sigma\to\Sigma$.
+This is called a \textbf{substitution cipher}.
+A \textbf{plaintext} or \textbf{message} is an element of $\Z_n^*$, i.e., a list of elements of the alphabet.
+A plaintext is \textbf{encrypted} by applying $\phi$ to each element, which yields the \textbf{ciphertext}.
 
-This can be attacked by first looking for repetitive patterns in the ciphertext (in order to guess the length of the key) and attacking the decomposed Caesar encrypted subsequences individually. 
+More precisely, this is called a \textbf{monoalphabetic} cipher.
+There are $|\Sigma|!$ different bijections of a finite alphabet $\Sigma$, e.g., $26!\approx 4\times 10^{26}$ for the Latin alphabet.
+So a brute force attack now seems very hard, and this looks like a strong cipher at first sight. 
+However, monoalphabetic substitution ciphers can be attacked very efficiently because they do not obfuscate patterns in the plaintext---they encrypt the same plaintext with the same ciphertext every time.
+In particular the same letter is always encrypted with the same letter. 
+Thus, if the language of the message is known, the frequencies of occurrences of letters in the ciphertext can be correlated to the expected frequencies of occurrences of letters in the plaintext.
+Then, if the ciphertext is long enough, only a few substitution remain likely and can be tried easily.
+
+This is why \textbf{polyalphabetic} ciphers were introduced.
+These map the same character differently depending on the position in the message where it occurs.
+
+A simple polyalphabetic cipher is the Vigin\`ere cipher, a generalization of Caesar's cipher.
+It splits the plaintext into blocks of $l$ characters.
+So a text of length $l\cdot n$ would be split into $n$ blocks.
+Then all letters are encrypted using Ceasar's cipher but using a different key depending on where in the block a character occurs.
+Thus, the key is an $l$-tuple $k=(k_0,\ldots,k_{l-1})$.
+For example, using $l=3$ and the key $(1,2,3)$, the block "aaa" becomes "bcd". 
+
+\begin{example}[Vigin\`ere Cipher]
+ We use blocks of length $l=3$ and the key $k=(1,2,3)$.
+ Then we obtain the encryption
+  \begin{lstlisting}
+    meet me after the toga party
+    nghu oh bhwft wig wpid qcuua
+  \end{lstlisting}
+\end{example}
+
+\begin{exercise}\label{exc:sd:viginere}
+Define the substitution function $\phi_k(i,x)$ of the Vigin\`ere cipher.
+Given a key $k=(k_0,\ldots,k_{l-1})$, $\phi_k(i,x)$ should be the character that substitutes the character $x$ in position $i$.
+\end{exercise}
+
+This can be attacked by first looking for repetitive patterns in the ciphertext (in order to guess the length $l$ of the key) and attacking the decomposed Caesar-encrypted subsequences individually.
 This works well if the length of the message is significantly longer than the length of the key. 
 
-One notable special case arises, when the length of the key equals the length of the message. In this case we call the cipher a one-time-pad. Then the encryption is absolutely secure, since any ciphertext can be decrypted to any arbitrary plaintext of same length, given the right key. It is vital now that the key is never used twice, otherwise the encryption can be broken by encrypting one ciphertext with the other yielding the encryption of the first \emph{plain}-text with the second. This already gives an attacker potentially very useful information (especially as parts of the plaintext might be known or guessed easily) and might also allow attacks recovering the key. Therefore, this encryption is known as one-time-pad. In practice however, this algorithm is not very useful itself, since it requires the secure transfer of a key as long as the message itself. This can however, occasionally be useful. 
+One notable special case arises when the length of the key equals the length of the message.
+In this case we call the cipher a \textbf{one-time-pad}.
+Then the encryption is absolutely secure as every ciphertext can be decrypted to an arbitrary plaintext by choosing an appropriate key.
+The security of course only holds if the key is only used once---otherwise, it is effectively used to encrypt one very long message.
+Therefore, one-time-pads have only limited use in practice: to send a second message, we have to transfer the new key secretly, which is as difficult as the original problem.
+The only practical way to use a one-time-pad is to pre-agree on an extremely long key that is used up gradually as messages are sent.
 
-A different approach to encrypt a message is to rearrange the letters of the message instead of substituting them. Such a cipher is called a transposition cipher. One very old example is the rail-fence transposition cipher. Here a message is spelled out diagonally over a fence. Then, the ciphertext is read of row-by-row. 
-\begin{example}\ 
+\subsubsection{Permutation Ciphers}
+
+A different approach is to \emph{rearrange} the letters of the message instead of substituting them.
+That is called a \textbf{transposition} or \textbf{permutation} cipher.
+An old example is the rail-fence permutation cipher.
+Here a message is spelled out diagonally up and down over a number of rows, and the ciphertext is read off row-by-row.
+The key $k$ is the number of rows.
+
+\begin{example}[Rail-Fence Cipher]
+\footnotemark
+ We use $k=3$.
+ Then we obtain the following ciphertext:
   \begin{lstlisting}
-    m e   e a t r t e t g   a t
-     e t m   f e   h   o a p r y
+    meet me after the toga party
+    m aregaetm fe h oapryeettt t
+  \end{lstlisting}
+which is computed using the following visual aid where spaces are indicated as underscores.
+  \begin{lstlisting}
+   m   _   a   r   e   g   a
+
+    e t m _ f e _ h _ o a p r y
+
+     e   e   t   t   t   _   t
   \end{lstlisting}
 \end{example}
-%Another interesting polyalphabetic cipher is the playfair cipher, probably beyond the scope of this class
+\footnotetext{A previous version of this example was wrong. It was fixed on Monday evening.}
 
-In any case, transposition ciphers don't really obfuscate plaintext patterns either, for instance the number of occurrences of the letters remain unchanged by the cipher. 
-We can now try to compose ciphers, to make them more secure. These ciphers (resulting from composition of other ciphers) are called product ciphers. If we compose a substitution cipher with a substitution cipher, we obtain a substitution cipher again, leaving the same structural weaknesses. If we compose two transposition ciphers, we will again yield a transposition cipher. If however, we compose a substitution and a transposition, we will yield a much harder cipher. This is the key idea of modern (symmetric) cryptography. 
+A similar, more general class of ciphers are the route ciphers.
+The plaintext is written out column-wise and then read back in a specific pattern (the route).
+Each route defines a route cipher, and the number of rows $k$ is the key.
+
+\begin{example}[Route Cipher]
+Using $k=4$, writing out the plaintext column-wise yields
+  \begin{lstlisting}
+    m   a r e g a
+    e m f     a r
+    e e t t t   t
+    t   e h o p y
+  \end{lstlisting}
+
+If we use the route ``top row, then alternating between second row and fourth row, then third row'', we obtain the same cipher as the rail-fence cipher for $k=3$.
+\end{example}
+
+Formally, a transposition cipher maps a plaintext $[x_0,\ldots,x_{m-1}]$ to $[x_{\tau(0)},\ldots,x_{\tau(l-1)}]$ where $\tau$ is a bijection of the positions $\{0,\ldots,l-1\}$ in the message.
+To make the cipher parametric in a key, we use a function $\tau_k$ that maps keys $k$ to bijections.
+
+\begin{exercise}\label{exc:sd:route}
+Consider the route cipher for the route ``row-wise starting with top row''.
+Define the resulting bijection $\tau_k$ of $\{0,\ldots,l-1\}$ mathematically.
+Also give the inverse of $\tau_k$ (which is needed for decryption).
+\end{exercise}
+
+Transposition ciphers do not really obfuscate plaintext patterns either.
+For instance, the number of occurrences of the letters remain unchanged by the cipher.
+
+\subsubsection{Product Ciphers}
+ 
+A good way to produce more secure encryptions is to compose multiple ciphers.
+The resulting ciphers are called \textbf{product} ciphers.
+If we compose a substitution cipher with another substitution cipher, we obtain a substitution cipher again, which is nothing new.
+Similarly, if we compose two permutation ciphers, we get a permutation cipher again.
+
+However, if we compose a substitution and a permutation, we get a new kind of cipher that is much harder to break.
+This is a key idea in modern (symmetric) cryptography. 
