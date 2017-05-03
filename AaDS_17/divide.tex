@@ -22,15 +22,36 @@ Then it recurses $7$ times and aggregates the results.
 
 A rather general class of divide-and-conquer algorithms is described as follows:
 \begin{compactenum}
- \item create $k$ subproblems of size $n/d$ in $D(n)$ time,
- \item 
+ \item input: problem of size $n$
+ \item divide: create $r$ subproblems of size $n/d$
+ \item conquer: solve the subproblems (usually recursively)
+ \item return: combine the solutions of the subproblems into the solution of the overall problem and return it
 \end{compactenum}
 
-% example: Karatsuba Multiplication
-% Karatsuba: multiply polynomials by using upper/lower coefficients (prelim: multiply linear polynomials with 3 multiplications), variant: n-bit int multiplication
-
 \subsection{Complexity}
-% Master theorem
+
+%Let $C(n)$ be the time complexity for input of size $n$.
+%Let $div(n)$ and $combine(n)$ be the costs of dividing and combining, and let $f(n)=div(n)+combine(n)$.
+%Then we have
+% \[C(n)=div(n) + r\cdot C(n/d) + combine(n)=r\cdot C(n/d) + f(n)\]
+%
+%By recursively substituting this formula into itself, we obtain
+% \[C(n)=r\cdot C(n/d) + f(n) = r(r\cdot C(n/d^2) + f(n/d)) + f(n)\]
+%\[= \ldots = r^k\cdot C(n/d^k) + r^{k-1}\cdot f(n/d^{k-1}) + \ldots + r\cdot f(n/b) + f(n)\]
+%where $k=roundup(\log_d n)$, i.e., $n/d^k\leq 1$.
+%Because the base cases $C(1)$ and $C(0)$ can always be solved in $O(1)$, we have $C(n/d^k)\in O(1)$.
+%
+%Such equations are called recurrences.
+%Solving them means giving a closed from for $C(n)$.
+%This is possible for many functions $f$, but the closed forms can become very complicated.
+%
+%If we are only interested in the $\Theta$-class of $C$ and $f$, the Master theorem handles most cases:
+%Let $f\in \Theta(n^c)$ for some $c>0$, e.g., $f$ could be a polynomial of degree $c$.
+%Then the recurrence becomes
+% \[C(n)\in r^k\cdot O(1) + r^{k-1}\cdot \Theta(n^c/d^{c(k-1)}) + \ldots + r\cdot n^c/d^c + n^c\]
+%We can now distinguish three cases:
+%
+%r^k=r^{\log_d n}=
 
 \section{Examples}
 
@@ -38,6 +59,38 @@ A rather general class of divide-and-conquer algorithms is described as follows:
 
 Binary search checks whether a sorted list of length $n$ contains a certain value.
 This takes $\Theta(\log n)$ if divide-and-conquer is used.
+
+\subsection{Karatsuba's Multiplication}
+
+We want to multiply two polynomials $p(x)=p_dX^d+\ldots+p_1X+p_0$ and $q(x)=q_dX^d+\ldots+q_1X+q_0$ with integer coefficients $p_i,q_i$.
+
+Without loss of generality, we assume that $d=2^n-1$.
+(If $d$ is not of this form, we can simply add $0$-terms to increase $d$.)
+Thus, each polynomial can be seen as a list $[p_d,\ldots,p_0]$ of length $d+1=2^n$.
+
+From now on, we represent polynomials as lists in this way.
+
+\subsubsection{Base Cases}
+
+If $n=0$, the lists have length $1$, i.e., the polynomials are constant integers.
+Here we use normal integer multiplication: $pq=[p_0 q_0]$.
+
+If $n=1$, we have $pq=[p_1 q_1, p_1 q_0 + p_0 q_1, p_0 q_0]$.
+The naive computation takes $4$ multiplications and $1$ addition.
+But we can compute it using only $3$ multiplications and $4$ additions as follows:
+\[pq=[a, b-a-c, c] \tb\mwhere a=p_1q_1, \;b=(p_1+p_0)(q_1+q_0),\;c=p_0 q_0\]
+
+\subsubsection{Algorithm}
+
+Karatsuba designed the following divide-and-conquer algorithm:
+\begin{compactenum}
+ \item Let $k=(d+1)/2=2^{n-1}$.
+ \item Split $p$ into two lists $p^u=[p_d,\ldots,p_k]$ and $p^l=[p_{k-1},\ldots,p_0]$ of length $k$. Split $q$ into $q^u$ and $q^l$ accordingly.\\
+ Now (as polynomials) $p(X)=p^u X^k+p^l$ and $q(X)=q^u X^k+q^l$.
+ \item Using the same trick as in the base case, compute $pq$ using $3$ multiplications of polynomials of lists of length $k$.
+\end{compactenum}
+
+% variant: n-bit int multiplication
 
 \subsection{Associative Folding}\label{sec:ad:monoidfold:divide}
 
