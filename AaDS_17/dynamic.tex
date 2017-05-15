@@ -33,7 +33,7 @@ In the simplest case a dynamic programming algorithm looks like this:
 
 \begin{acode}
 \afun[B]{dynamic}{n:\N}{
-	results := \anew{Array}{B}(n)\\
+	results := \anew{Array[B]}{n}\\
 	\aforin{i}{0,\ldots,n}{
 	  r := P(i) \acomment{may use $results[0], \ldots, results[i-1]$} \\
 	  results[i]:= r
@@ -57,7 +57,7 @@ Consequently, this requires a two-dimensional table storing $Q(x,i)$ for all pos
 The general algorithm becomes
 \begin{acode}
 \afun[B]{dynamic}{a:A}{
-	results := \anew{Array}{B}(|A|, k)\\
+	results := \anew{Array[B]}{|A|, k}\\
 	\aforin{i}{0,\ldots,k}{
 	  \aforin{x}{A}{
    	  r := Q(x,i) \acomment{may use $results[y,0], \ldots, results[y,i-1]$ for any $y\in A$} \\
@@ -67,6 +67,20 @@ The general algorithm becomes
 	results[a,k]
 }
 \end{acode}
+
+\begin{remark}
+The technique of changing a problem $P(a)$ to a problem $Q(a,i)$ by
+\begin{compactitem}
+ \item adding an auxiliary variable $i$ that makes the problem more general
+ \item using a fixed $k$ to recover the original problem as the special case $P(a)=Q(a,k)$
+\end{compactitem}
+is not specific to dynamic programming.
+
+We find it in many recursive algorithms as well.
+Examples are quicksort from Sect.~\ref{sec:ad:sort:quick} and tail-recursion from Sect.~\ref{sec:ad:recurse:tail}.
+
+In all cases, the more general problem is --- counter-intuitively --- easier to solve because the extra generality makes deep properties visible that can be used to reduce problems to smaller subproblems and then design efficient algorithms.
+\end{remark}
 
 \subsection{Correctness}
 The main condition for correctness is that $P(x)=Q(x,k)$ for all $x\in A$.
@@ -142,7 +156,7 @@ The general dynamic programming algorithm becomes:
 
 \begin{acode}
 \afun[B]{cheapestPath}{a_1:N, a_2: N}{
-	results := \anew{Array}{\N^\infty}(|N|, |N|, k)\\
+	results := \anew{Array[\N^\infty]}{|N|, |N|, k}\\
 	\aforin{i}{0,\ldots,k}{
 	  \aforin{(x_1,x_2)}{N\times N}{
    	  r := \aifelseI{i==0}{E_{x_1x_2}}{\min \{results[x_1,y,i-1]+weight(y,x_2)\,|\,y\in N\}}\\
@@ -179,7 +193,7 @@ It also has a neutral element, namely the matrix $E$ from above with $0$s along 
 We can now see that the dynamic program becomes
 \begin{acode}
 \afun[B]{cheapestPath}{a_1:N, a_2: N}{
-	results := \anew{Array}{(\N^\infty)^{n\times n}}(k)\\
+	results := \anew{Array[(\N^\infty)^{n\times n}]}{k}\\
 	\aforin{i}{0,\ldots,k}{
 	  results[i]:=\aifelseI{i==0}{E}{results[i-1]\odot Adj}
 	}\\
